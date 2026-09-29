@@ -1,0 +1,5 @@
+"use client";
+import {useRouter} from "next/navigation"; import {useState} from "react";
+export function AdminActions({action,id}:{action:"approve"|"reject"|"resolve"|"logout",id?:string}){const router=useRouter();const [busy,setBusy]=useState(false);
+async function run(){setBusy(true);if(action==="logout"){await fetch("/api/admin/logout",{method:"POST"});return router.push("/admin/login")}await fetch("/api/admin/moderate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,id})});router.refresh();setBusy(false)}
+const label={approve:"Approve",reject:"Reject",resolve:"Resolve",logout:"Logout"}[action]; return <button disabled={busy} onClick={run} className={`cg-btn text-sm ${action==="approve"?"bg-emerald-600/20 text-emerald-300 border border-emerald-500/20":action==="reject"?"bg-red-600/20 text-red-300 border border-red-500/20":"cg-secondary"}`}>{busy?"...":label}</button>}

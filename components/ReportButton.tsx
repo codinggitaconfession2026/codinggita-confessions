@@ -1,0 +1,5 @@
+"use client";
+import {useState} from "react";
+export function ReportButton({id}:{id:string}){const [open,setOpen]=useState(false);const [reason,setReason]=useState("");const [msg,setMsg]=useState("");
+async function submit(){const r=await fetch("/api/reports",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({confessionId:id,reason})});const d=await r.json();setMsg(r.ok?"Report submitted. Thank you.":d.error||"Failed");if(r.ok){setReason("");setOpen(false)}}
+return <div className="mt-5">{open?<div className="rounded-2xl border border-[#202947] bg-[#080d1d] p-4"><textarea className="cg-input min-h-24" value={reason} onChange={e=>setReason(e.target.value.slice(0,300))} placeholder="Why are you reporting this?"/><div className="mt-3 flex gap-2"><button onClick={submit} className="cg-btn cg-primary text-sm">Send report</button><button onClick={()=>setOpen(false)} className="cg-btn cg-secondary text-sm">Cancel</button></div></div>:<button onClick={()=>setOpen(true)} className="text-sm text-red-300 hover:text-red-200">Report this confession</button>}{msg&&<p className="mt-2 text-xs text-[#8f9ab8]">{msg}</p>}</div>}
