@@ -8,6 +8,7 @@ create table if not exists public.profiles (
  bio text check (char_length(bio) <= 240),
  role text not null default 'student' check (role in ('student','moderator','admin')),
  allow_messages text not null default 'friends' check (allow_messages in ('everyone','friends','none')),
+ approval_status text not null default 'pending' check (approval_status in ('pending','approved','rejected')),
  created_at timestamptz not null default now()
 );
 
@@ -85,6 +86,18 @@ create table if not exists public.admin_content (
  kind text not null check(kind in ('post','story','reel')), title text, caption text, asset_text text not null,
  status text not null default 'draft' check(status in ('draft','ready','published')), created_at timestamptz not null default now()
 );
+
+-- Account approval: existing profiles remain usable, new accounts start pending.
+alter table public.profiles add column if not exists approval_status text;
+update public.profiles set approval_status='approved' where approval_status is null;
+alter table public.profiles alter column approval_status set default 'pending';
+alter table public.profiles alter column approval_status set not null;
+do $ begin
+  if not exists (select 1 from pg_constraint where conname='profiles_approval_status_check') then
+    alter table public.profiles add constraint profiles_approval_status_check check (approval_status in ('pending','approved','rejected'));
+  end if;
+end $;
+create index if not exists profiles_approval_status_idx on public.profiles(approval_status);
 
 alter table public.profiles enable row level security; alter table public.friendships enable row level security;
 alter table public.posts enable row level security; alter table public.post_likes enable row level security;
