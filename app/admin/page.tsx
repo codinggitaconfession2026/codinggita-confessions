@@ -47,14 +47,51 @@ export default function Admin() {
 
   function generate(p: any) { setAsset(p.content); setCaption(`Anonymous CodingGita confession #${p.id.slice(0, 6)}\n\n${p.content}\n\n#CodingGita #Confessions`); }
   function download() {
-    const text = asset || "CodingGita Confessions"; const esc = text.replace(/&/g, "&amp;").replace(/</g, "&lt;");
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080"><rect width="100%" height="100%" fill="#080b16"/><text x="70" y="170" fill="#a78bfa" font-size="52" font-family="Arial">CodingGita Confessions</text><foreignObject x="70" y="260" width="940" height="650"><div xmlns="http://www.w3.org/1999/xhtml" style="font:42px Arial;color:white;line-height:1.4">${esc}</div></foreignObject></svg>`;
-    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" })); a.download = `codinggita-${kind}.svg`; a.click();
+    const text = asset || "CodingGita Confessions";
+    const width = kind === "story" ? 1080 : 1080;
+    const height = kind === "story" ? 1920 : 1080;
+    const safe = text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    const lines = safe.match(/.{1,34}(?:\\s|$)/g) || [safe];
+    const lineSvg = lines.slice(0, kind === "story" ? 16 : 10).map((line,i)=>`<text x="90" y="${kind==="story" ? 570+i*78 : 470+i*68}" fill="#f8fafc" font-size="${kind==="story" ? 52 : 46}" font-family="Inter,Arial,sans-serif" font-weight="600">${line.trim()}</text>`).join("");
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#7c3aed"/><stop offset=".55" stop-color="#db2777"/><stop offset="1" stop-color="#06b6d4"/></linearGradient><filter id="blur"><feGaussianBlur stdDeviation="70"/></filter></defs>
+      <rect width="100%" height="100%" fill="#070914"/>
+      <circle cx="${width*.15}" cy="${height*.18}" r="260" fill="#7c3aed" opacity=".28" filter="url(#blur)"/>
+      <circle cx="${width*.88}" cy="${height*.72}" r="300" fill="#06b6d4" opacity=".18" filter="url(#blur)"/>
+      <rect x="55" y="55" width="${width-110}" height="${height-110}" rx="42" fill="#ffffff08" stroke="#ffffff18"/>
+      <rect x="90" y="105" width="115" height="10" rx="5" fill="url(#g)"/>
+      <text x="90" y="${kind==="story" ? 330 : 250}" fill="#a78bfa" font-size="30" font-family="Inter,Arial,sans-serif" font-weight="800">CODINGGITA CONFESSIONS</text>
+      <text x="90" y="${kind==="story" ? 420 : 335}" fill="#f8fafc" font-size="${kind==="story" ? 68 : 62}" font-family="Inter,Arial,sans-serif" font-weight="900">Someone had to say it.</text>
+      ${lineSvg}
+      <text x="90" y="${height-130}" fill="#94a3b8" font-size="27" font-family="Inter,Arial,sans-serif">@codinggitaconfessions · Anonymous</text>
+    </svg>`;
+    const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([svg],{type:"image/svg+xml"})); a.download=`codinggita-${kind}.svg`; a.click();
   }
+
   function reel() {
-    const text = asset || "CodingGita Confessions"; const c = document.createElement("canvas"); c.width = 1080; c.height = 1920; const x = c.getContext("2d")!; const stream = c.captureStream(30); const rec = new MediaRecorder(stream, { mimeType: "video/webm" }); const chunks: Blob[] = [];
-    rec.ondataavailable = e => e.data.size && chunks.push(e.data); rec.onstop = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(chunks, { type: "video/webm" })); a.download = "codinggita-confession-reel.webm"; a.click(); }; rec.start(); let frame = 0;
-    const timer = setInterval(() => { x.fillStyle = "#080b16"; x.fillRect(0, 0, c.width, c.height); x.fillStyle = "#8b5cf6"; x.fillRect(70, 120, 940, 10); x.fillStyle = "white"; x.font = "bold 64px Arial"; x.fillText("CodingGita Confessions", 70, 230); x.font = "48px Arial"; const words = text.match(/.{1,28}(?:\s|$)/g) || [text]; words.slice(0, 18).forEach((line, i) => x.fillText(line.trim(), 70, 380 + i * 75)); x.fillStyle = "#a78bfa"; x.font = "32px Arial"; x.fillText("@codinggitaconfessions", 70, 1780); frame++; if (frame > 180) { clearInterval(timer); rec.stop(); } }, 33);
+    const text = asset || "CodingGita Confessions";
+    const c=document.createElement("canvas"); c.width=1080;c.height=1920;
+    const x=c.getContext("2d")!;
+    const stream=c.captureStream(30);
+    const rec=new MediaRecorder(stream,{mimeType:"video/webm"});
+    const chunks:Blob[]=[];
+    rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);
+    rec.onstop=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(chunks,{type:"video/webm"}));a.download="codinggita-confession-reel.webm";a.click();};
+    rec.start();
+    let frame=0;
+    const lines=(text.match(/.{1,27}(?:\\s|$)/g)||[text]).slice(0,15).map(v=>v.trim());
+    const timer=setInterval(()=>{
+      const g=x.createLinearGradient(0,0,1080,1920);g.addColorStop(0,"#070914");g.addColorStop(.5,"#17102e");g.addColorStop(1,"#061a25");
+      x.fillStyle=g;x.fillRect(0,0,1080,1920);
+      x.globalAlpha=.18;x.fillStyle="#a855f7";x.beginPath();x.arc(170,360,260,0,Math.PI*2);x.fill();
+      x.fillStyle="#22d3ee";x.beginPath();x.arc(930,1400,300,0,Math.PI*2);x.fill();x.globalAlpha=1;
+      x.fillStyle="#a78bfa";x.fillRect(70,115,940,8);
+      x.fillStyle="white";x.font="900 64px Arial";x.fillText("CodingGita Confessions",70,260);
+      x.font="900 42px Arial";x.fillStyle="#a78bfa";x.fillText("SOMEONE HAD TO SAY IT.",70,345);
+      x.font="600 48px Arial";x.fillStyle="#f8fafc";lines.forEach((line,i)=>x.fillText(line,70,500+i*78));
+      x.fillStyle="#94a3b8";x.font="28px Arial";x.fillText("@codinggitaconfessions · Anonymous",70,1780);
+      frame++;if(frame>180){clearInterval(timer);rec.stop();}
+    },33);
   }
 
   return <main className="shell admin-page">
