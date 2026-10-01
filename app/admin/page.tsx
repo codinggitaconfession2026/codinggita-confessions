@@ -51,7 +51,7 @@ export default function Admin() {
     const width = kind === "story" ? 1080 : 1080;
     const height = kind === "story" ? 1920 : 1080;
     const safe = text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-    const lines = safe.match(/.{1,34}(?:\\s|$)/g) || [safe];
+    const lines = safe.match(/.{1,34}(?:\s|$)/g) || [safe];
     const lineSvg = lines.slice(0, kind === "story" ? 16 : 10).map((line,i)=>`<text x="90" y="${kind==="story" ? 570+i*78 : 470+i*68}" fill="#f8fafc" font-size="${kind==="story" ? 52 : 46}" font-family="Inter,Arial,sans-serif" font-weight="600">${line.trim()}</text>`).join("");
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
       <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#7c3aed"/><stop offset=".55" stop-color="#db2777"/><stop offset="1" stop-color="#06b6d4"/></linearGradient><filter id="blur"><feGaussianBlur stdDeviation="70"/></filter></defs>
@@ -79,7 +79,7 @@ export default function Admin() {
     rec.onstop=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(chunks,{type:"video/webm"}));a.download="codinggita-confession-reel.webm";a.click();};
     rec.start();
     let frame=0;
-    const lines=(text.match(/.{1,27}(?:\\s|$)/g)||[text]).slice(0,15).map(v=>v.trim());
+    const lines=(text.match(/.{1,27}(?:\s|$)/g)||[text]).slice(0,15).map(v=>v.trim());
     const timer=setInterval(()=>{
       const g=x.createLinearGradient(0,0,1080,1920);g.addColorStop(0,"#070914");g.addColorStop(.5,"#17102e");g.addColorStop(1,"#061a25");
       x.fillStyle=g;x.fillRect(0,0,1080,1920);
