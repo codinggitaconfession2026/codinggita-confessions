@@ -32,7 +32,8 @@ export async function POST(req: Request) {
 
     if (error) throw error;
     return NextResponse.json({ ok: true, id: data?.id });
-  } catch {
+  } catch (error) {
+    console.error("Anonymous confession submission failed", error);
     return NextResponse.json({ error: "Submission failed. Please try again." }, { status: 500 });
   }
 }
