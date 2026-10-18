@@ -140,3 +140,39 @@ create trigger confession_comment_count after insert or update or delete on publ
 for each row execute function public.sync_confession_comments();
 
 -- Private admin-support chat intentionally remains available to pending students.
+
+
+-- C) Make profile creation robust for duplicate display names/usernames.
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path=public
+as $$
+declare
+  base_username text;
+  candidate text;
+  suffix text;
+begin
+  base_username := coalesce(nullif(new.raw_user_meta_data->>'username',''), 'user_' || substr(replace(new.id::text,'-',''),1,8));
+  base_username := regexp_replace(lower(base_username), '[^a-z0-9_]', '', 'g');
+  if char_length(base_username) < 3 then base_username := 'student'; end if;
+  candidate := left(base_username, 24);
+
+  if exists (select 1 from public.profiles where username=candidate) then
+    suffix := substr(replace(new.id::text,'-',''),1,8);
+    candidate := left(base_username, 15) || '_' || suffix;
+  end if;
+
+  insert into public.profiles(id,username,display_name,approval_status)
+  values (
+    new.id,
+    candidate,
+    coalesce(nullif(new.raw_user_meta_data->>'display_name',''),'Student'),
+    'pending'
+  )
+  on conflict (id) do nothing;
+
+  return new;
+end;
+$$;
