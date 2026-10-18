@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { getBrowserSupabase } from '@/lib/supabase-browser';
-import { Home, MessageCircle, Sparkles, LogIn, UserCircle, Shield, Menu, X, PenLine, LogOut } from 'lucide-react';
+import { Home, MessageCircle, Sparkles, LogIn, UserCircle, Shield, Menu, X, PenLine, LogOut, FileText } from 'lucide-react';
 
 export default function Navbar() {
   const [user, setUser] = useState<any>(null);
@@ -27,6 +27,7 @@ export default function Navbar() {
         <button className="mobile-menu" onClick={() => setOpen(!open)} aria-label="Menu">{open ? <X/> : <Menu/>}</button>
         <nav className={`nav-panel ${open ? 'open' : ''}`}>
           <Link href="/community" onClick={close}><Home size={17}/> Community</Link>
+          <Link href="/confessions" onClick={close}><FileText size={17}/> Confessions</Link>
           <Link href="/chat" onClick={close}><MessageCircle size={17}/> Chat</Link>
           <Link href="/ai" onClick={close}><Sparkles size={17}/> CG Buddy</Link>
           {user && <Link href="/support" onClick={close}><MessageCircle size={17}/> Support</Link>}
