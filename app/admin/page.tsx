@@ -95,6 +95,7 @@ export default function Admin() {
   }
 
   function reel() {
+    if (typeof MediaRecorder === "undefined") { setNotice("Reel generation needs a modern browser such as Chrome or Edge."); return; }
     const text = asset || "CodingGita Confessions";
     const c=document.createElement("canvas"); c.width=1080;c.height=1920;
     const x=c.getContext("2d")!;
@@ -103,7 +104,7 @@ export default function Admin() {
     const rec=new MediaRecorder(stream,{mimeType});
     const chunks:Blob[]=[];
     rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);
-    rec.onstop=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(chunks,{type:"video/webm"}));a.download=mimeType.startsWith("video/mp4")?"codinggita-confession-reel.mp4":"codinggita-confession-reel.webm";a.click();};
+    rec.onstop=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(chunks,{type:mimeType}));a.download=mimeType.startsWith("video/mp4")?"codinggita-confession-reel.mp4":"codinggita-confession-reel.webm";a.click();};
     rec.start();
     let frame=0;
     const lines=(text.match(/.{1,27}(?:\s|$)/g)||[text]).slice(0,15).map(v=>v.trim());
